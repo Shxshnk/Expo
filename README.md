@@ -1,9 +1,6 @@
 # Commedia Solutions — Expo 2026 Technology Showcase
 
-> **Award-Winning 3D & Motion Redesign**  
 > Showcasing two flagship enterprise products: **CNMS v2.0** (Commedia Network Management System) and **Operations Advisor** (AI-Powered Operational Assistance).
-
-An immersive, cinematic, 3D scroll-driven marketing experience inspired by the creative websites featured on [Lenis](https://lenis.dev/showcase) and [Anime.js](https://animejs.com/). Built for Expo event visitors scanning brochure QR codes on mobile and desktop devices.
 
 ---
 
