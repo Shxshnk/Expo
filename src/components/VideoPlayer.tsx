@@ -1,9 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Play, Pause, Volume2, VolumeX, Maximize, RefreshCw } from 'lucide-react';
 import {
-  trackVideoStart,
-  trackVideoProgress,
-  trackVideoComplete,
+  trackProductDemoClick,
+  trackDemoVideoStart,
 } from '../lib/analytics';
 
 interface VideoPlayerProps {
@@ -32,33 +31,40 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [controlsVisible, setControlsVisible] = useState(false);
-  const [milestonesReached, setMilestonesReached] = useState<Set<number>>(new Set());
+
+  const productLabel: 'CNMS' | 'Operations Advisor' =
+    productName === 'cnms_v2' ? 'CNMS' : 'Operations Advisor';
 
   const isCyan = accentColor === 'cyan';
   const accentHex = isCyan ? '#38bdf8' : '#a855f7';
 
   useEffect(() => {
-    setMilestonesReached(new Set());
     setHasError(false);
     setIsPlaying(false);
     setCurrentTime(0);
     setDuration(0);
   }, [src]);
 
+  const handlePlay = () => {
+    setIsPlaying(true);
+    // Listen strictly to native playback start, fire once per page session
+    trackDemoVideoStart(productLabel);
+  };
+
+  const handlePause = () => {
+    setIsPlaying(false);
+  };
+
   const togglePlay = () => {
     const video = videoRef.current;
     if (!video) return;
 
     if (video.paused || video.ended) {
+      // User clicked play control
+      trackProductDemoClick(productLabel);
       video.play().catch(() => setHasError(true));
-      setIsPlaying(true);
-      if (!milestonesReached.has(0)) {
-        trackVideoStart(title, productName);
-        setMilestonesReached((prev) => new Set(prev).add(0));
-      }
     } else {
       video.pause();
-      setIsPlaying(false);
     }
   };
 
@@ -82,20 +88,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const handleTimeUpdate = () => {
     const video = videoRef.current;
     if (!video || !video.duration) return;
-
     setCurrentTime(video.currentTime);
-    const percent = (video.currentTime / video.duration) * 100;
-
-    if (percent >= 25 && !milestonesReached.has(25)) {
-      trackVideoProgress(title, productName, 25);
-      setMilestonesReached((prev) => new Set(prev).add(25));
-    } else if (percent >= 50 && !milestonesReached.has(50)) {
-      trackVideoProgress(title, productName, 50);
-      setMilestonesReached((prev) => new Set(prev).add(50));
-    } else if (percent >= 75 && !milestonesReached.has(75)) {
-      trackVideoProgress(title, productName, 75);
-      setMilestonesReached((prev) => new Set(prev).add(75));
-    }
   };
 
   const handleLoadedMetadata = () => {
@@ -115,10 +108,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
   const handleEnded = () => {
     setIsPlaying(false);
-    if (!milestonesReached.has(100)) {
-      trackVideoComplete(title, productName);
-      setMilestonesReached((prev) => new Set(prev).add(100));
-    }
   };
 
   const formatTime = (secs: number) => {
@@ -161,6 +150,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             aria-label={title}
             playsInline
             preload="metadata"
+            onPlay={handlePlay}
+            onPause={handlePause}
             onTimeUpdate={handleTimeUpdate}
             onLoadedMetadata={handleLoadedMetadata}
             onEnded={handleEnded}

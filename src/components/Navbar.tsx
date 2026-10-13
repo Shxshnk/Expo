@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { useScrollProgress } from '../hooks/useScrollAnimations';
+import { trackProductDemoClick } from '../lib/analytics';
 
 interface NavbarProps {
   onNavigate: (sectionId: string) => void;
@@ -27,6 +28,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onRequestDemo }) => 
   ];
 
   const handleLinkClick = (id: string) => {
+    if (id === 'cnms') {
+      trackProductDemoClick('CNMS');
+    } else if (id === 'operations-advisor') {
+      trackProductDemoClick('Operations Advisor');
+    }
     onNavigate(id);
     setMobileOpen(false);
   };

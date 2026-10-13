@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowUp, Mail, Globe, Phone, ExternalLink } from 'lucide-react';
-import { trackContactEmailClick } from '../lib/analytics';
+import { trackProductDemoClick } from '../lib/analytics';
 
 interface FooterProps {
   onNavigate: (sectionId: string) => void;
@@ -47,7 +47,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <ul className="space-y-2">
               <li>
                 <button
-                  onClick={() => onNavigate('cnms')}
+                  onClick={() => {
+                    trackProductDemoClick('CNMS');
+                    onNavigate('cnms');
+                  }}
                   className="hover:text-white transition-colors text-neutral-400"
                 >
                   01 &bull; CNMS v2.0 Platform
@@ -55,7 +58,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </li>
               <li>
                 <button
-                  onClick={() => onNavigate('operations-advisor')}
+                  onClick={() => {
+                    trackProductDemoClick('Operations Advisor');
+                    onNavigate('operations-advisor');
+                  }}
                   className="hover:text-white transition-colors text-neutral-400"
                 >
                   02 &bull; Operations Advisor
@@ -80,7 +86,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <div className="space-y-2.5">
               <a
                 href="mailto:sales@commediaindia.com"
-                onClick={() => trackContactEmailClick()}
                 className="flex items-center gap-2 hover:text-white transition-colors text-neutral-400"
               >
                 <Mail className="w-3.5 h-3.5 text-sky-400 shrink-0" />

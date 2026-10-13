@@ -1,6 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { VideoPlayer } from '../components/VideoPlayer';
-import { trackProductSectionView, trackProductCTAClick } from '../lib/analytics';
 import { ArrowUpRight } from 'lucide-react';
 
 interface OperationsAdvisorSectionProps {
@@ -8,26 +7,6 @@ interface OperationsAdvisorSectionProps {
 }
 
 export const OperationsAdvisorSection: React.FC<OperationsAdvisorSectionProps> = ({ onRequestDemo }) => {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            trackProductSectionView('operations_advisor');
-          }
-        });
-      },
-      { threshold: 0.15 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-    return () => observer.disconnect();
-  }, []);
-
   const capabilities = [
     {
       num: '01',
@@ -54,7 +33,6 @@ export const OperationsAdvisorSection: React.FC<OperationsAdvisorSectionProps> =
   return (
     <section
       id="operations-advisor"
-      ref={sectionRef}
       className="relative pt-10 sm:pt-14 pb-14 sm:pb-16 px-4 sm:px-6 lg:px-8 bg-[#050608] hairline-b"
     >
       <div className="max-w-7xl mx-auto w-full">
@@ -97,10 +75,7 @@ export const OperationsAdvisorSection: React.FC<OperationsAdvisorSectionProps> =
                 </p>
                 <div className="pt-4 mt-4 hairline-t">
                   <button
-                    onClick={() => {
-                      trackProductCTAClick('operations_advisor', 'product_section');
-                      onRequestDemo('operations_advisor');
-                    }}
+                    onClick={() => onRequestDemo('operations_advisor')}
                     className="text-xs font-sans uppercase tracking-wider text-purple-400 hover:text-white transition-colors inline-flex items-center gap-1.5"
                   >
                     <span>Request Operations Advisor Briefing</span>

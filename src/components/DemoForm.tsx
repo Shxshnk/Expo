@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Phone, Globe, Send, Check, Copy, ExternalLink, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { trackDemoRequestClick, trackContactEmailClick } from '../lib/analytics';
+import { trackGenerateLead } from '../lib/analytics';
 
 interface DemoFormProps {
   initialProduct?: 'cnms_v2' | 'operations_advisor' | 'both';
@@ -65,7 +65,7 @@ export const DemoForm: React.FC<DemoFormProps> = ({ initialProduct = 'both' }) =
 
     // Spam honeypot detection
     if (honeypot.trim()) {
-      // Silently simulate success for bots
+      // Silently simulate success for bots without firing analytics lead
       setIsSuccess(true);
       return;
     }
@@ -75,7 +75,6 @@ export const DemoForm: React.FC<DemoFormProps> = ({ initialProduct = 'both' }) =
     }
 
     setIsSubmitting(true);
-    trackDemoRequestClick(product);
 
     const payload = {
       name: name.trim(),
@@ -101,6 +100,10 @@ export const DemoForm: React.FC<DemoFormProps> = ({ initialProduct = 'both' }) =
       if (response.ok) {
         setIsSuccess(true);
         setErrorMessage(null);
+        // Track GA4 generate_lead ONLY upon confirmed success with zero PII
+        const leadProduct: 'CNMS' | 'Operations Advisor' | 'Both' =
+          product === 'cnms_v2' ? 'CNMS' : product === 'operations_advisor' ? 'Operations Advisor' : 'Both';
+        trackGenerateLead(leadProduct);
       } else {
         const errorData = await response.json().catch(() => null);
         if (errorData && errorData.errors && errorData.errors.length > 0) {
@@ -201,7 +204,6 @@ export const DemoForm: React.FC<DemoFormProps> = ({ initialProduct = 'both' }) =
               <div className="space-y-4 pt-4 hairline-t text-xs font-sans text-neutral-300">
                 <a
                   href="mailto:sales@commediaindia.com"
-                  onClick={() => trackContactEmailClick()}
                   className="flex items-center gap-3 p-3.5 bg-[#0A0D14] hairline-all hover:border-neutral-400 transition-colors group"
                 >
                   <Mail className="w-4 h-4 text-sky-400 shrink-0" />

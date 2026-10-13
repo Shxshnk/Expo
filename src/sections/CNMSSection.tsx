@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { VideoPlayer } from '../components/VideoPlayer';
-import { trackProductSectionView, trackProductCTAClick } from '../lib/analytics';
 import { ArrowUpRight, Maximize2, X } from 'lucide-react';
 
 interface CNMSSectionProps {
@@ -8,27 +7,8 @@ interface CNMSSectionProps {
 }
 
 export const CNMSSection: React.FC<CNMSSectionProps> = ({ onRequestDemo }) => {
-  const sectionRef = useRef<HTMLElement>(null);
   const [selectedScreenIdx, setSelectedScreenIdx] = useState(0);
   const [fullscreenModal, setFullscreenModal] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            trackProductSectionView('cnms_v2');
-          }
-        });
-      },
-      { threshold: 0.15 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-    return () => observer.disconnect();
-  }, []);
 
   // Verified authentic CNMS v2.0 interface captures
   const cnmsScreens = [
@@ -75,7 +55,6 @@ export const CNMSSection: React.FC<CNMSSectionProps> = ({ onRequestDemo }) => {
   return (
     <section
       id="cnms"
-      ref={sectionRef}
       className="relative pt-10 sm:pt-14 pb-14 sm:pb-16 px-4 sm:px-6 lg:px-8 bg-[#050608] hairline-b"
     >
       <div className="max-w-7xl mx-auto w-full">
@@ -104,10 +83,7 @@ export const CNMSSection: React.FC<CNMSSectionProps> = ({ onRequestDemo }) => {
                 </p>
                 <div className="pt-4 mt-4 hairline-t">
                   <button
-                    onClick={() => {
-                      trackProductCTAClick('cnms_v2', 'product_section');
-                      onRequestDemo('cnms_v2');
-                    }}
+                    onClick={() => onRequestDemo('cnms_v2')}
                     className="text-xs font-sans uppercase tracking-wider text-sky-400 hover:text-white transition-colors inline-flex items-center gap-1.5"
                   >
                     <span>Request CNMS v2.0 Demonstration Briefing</span>

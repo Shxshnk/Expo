@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDown } from 'lucide-react';
-import { trackProductCTAClick } from '../lib/analytics';
+import { trackProductDemoClick } from '../lib/analytics';
 
 interface HeroProps {
   onNavigate: (sectionId: string) => void;
@@ -63,7 +63,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate, onRequestDemo }) => {
                 {/* Watch CNMS Demo Link */}
                 <button
                   onClick={() => {
-                    trackProductCTAClick('cnms_v2', 'hero');
+                    trackProductDemoClick('CNMS');
                     onNavigate('cnms');
                   }}
                   className="group inline-flex items-center gap-2.5 text-sm font-display font-medium text-white hover:text-sky-300 transition-colors w-fit"
@@ -78,7 +78,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate, onRequestDemo }) => {
                 {/* Watch Operations Advisor Demo Link */}
                 <button
                   onClick={() => {
-                    trackProductCTAClick('operations_advisor', 'hero');
+                    trackProductDemoClick('Operations Advisor');
                     onNavigate('operations-advisor');
                   }}
                   className="group inline-flex items-center gap-2.5 text-sm font-display font-medium text-white hover:text-purple-300 transition-colors w-fit"
@@ -120,7 +120,10 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate, onRequestDemo }) => {
 
               {/* Unobstructed Genuine Screenshot Frame */}
               <div
-                onClick={() => onNavigate('cnms')}
+                onClick={() => {
+                  trackProductDemoClick('CNMS');
+                  onNavigate('cnms');
+                }}
                 className="relative bg-black overflow-hidden cursor-pointer"
               >
                 <img
@@ -132,7 +135,10 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate, onRequestDemo }) => {
 
               {/* Contextual Caption Strip Leading Into the CNMS Demo Section */}
               <div
-                onClick={() => onNavigate('cnms')}
+                onClick={() => {
+                  trackProductDemoClick('CNMS');
+                  onNavigate('cnms');
+                }}
                 className="px-4 sm:px-5 py-3 hairline-t bg-[#07090F] flex items-center justify-between text-xs font-sans text-neutral-400 hover:text-white transition-colors cursor-pointer"
               >
                 <span className="truncate pr-2">

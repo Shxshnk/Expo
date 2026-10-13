@@ -1,12 +1,17 @@
 /**
- * Google Analytics 4 (GA4) Integration for Commedia Solutions Expo Showcase
- * 
- * Provides privacy-conscious, enterprise-compliant event tracking.
- * Gracefully no-ops when VITE_GA_MEASUREMENT_ID is absent.
- * Strict PII prevention: No names, emails, company info, or form messages are ever sent.
+ * Google Analytics 4 (GA4) Integration
+ * Commedia Solutions — Broadcast India Show 2026 Showcase
+ *
+ * Privacy and Data Quality Guarantees:
+ * - Strict PII prevention: No names, email addresses, company names, or messages are ever sent to GA4.
+ * - Sends only specified event names (page_view, product_demo_click, demo_video_start, generate_lead)
+ *   and non-identifying product parameters ('CNMS' | 'Operations Advisor' | 'Both').
+ * - Preserves native campaign attribution without hardcoding UTM parameters.
+ * - Guards against duplicate page views, duplicate tags, and repeated video start events.
+ * - Gracefully no-ops when VITE_GA_MEASUREMENT_ID is missing or empty.
  */
 
-// Window interface augmentation for gtag
+// Global window augmentation for Google Tag (gtag.js)
 declare global {
   interface Window {
     dataLayer: any[];
@@ -16,141 +21,108 @@ declare global {
 
 let isInitialized = false;
 
-// Cache UTM parameters parsed from URL upon entry
-export interface UTMParameters {
-  utm_source?: string;
-  utm_medium?: string;
-  utm_campaign?: string;
-  utm_term?: string;
-  utm_content?: string;
-}
+// Session-level set preventing repeated demo_video_start events per product during a page session
+const videoStartTracked = new Set<string>();
 
-export function getUTMParameters(): UTMParameters {
-  if (typeof window === 'undefined') return {};
-  const params = new URLSearchParams(window.location.search);
-  const utm: UTMParameters = {};
-  
-  if (params.get('utm_source')) utm.utm_source = params.get('utm_source')!;
-  if (params.get('utm_medium')) utm.utm_medium = params.get('utm_medium')!;
-  if (params.get('utm_campaign')) utm.utm_campaign = params.get('utm_campaign')!;
-  if (params.get('utm_term')) utm.utm_term = params.get('utm_term')!;
-  if (params.get('utm_content')) utm.utm_content = params.get('utm_content')!;
-  
-  return utm;
-}
-
+/**
+ * Initializes Google Analytics 4.
+ * Injects the official Google Tag script if not present and configures the measurement ID.
+ * Standard GA4 config automatically records the initial page_view and extracts UTM campaign parameters
+ * (e.g., ?utm_source=broadcast_india_show&utm_medium=qr&utm_campaign=broadcast_india_2026) directly from window.location.
+ */
 export function initGA(): void {
   if (typeof window === 'undefined' || isInitialized) return;
-  
+
   const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
   if (!measurementId || measurementId.trim() === '') {
-    // Analytics is disabled gracefully
+    // GA4 gracefully disabled when measurement ID is not provided
     return;
   }
 
-  // Load gtag script asynchronously
-  const script = document.createElement('script');
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-  document.head.appendChild(script);
+  // Prevent duplicate script tag injection if script already exists
+  const existingScript = document.querySelector(`script[src*="googletagmanager.com/gtag/js?id=${measurementId}"]`);
+  if (!existingScript) {
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+    document.head.appendChild(script);
+  }
 
+  // Setup dataLayer and gtag queue
   window.dataLayer = window.dataLayer || [];
   window.gtag = function () {
     window.dataLayer.push(arguments);
   };
-  
+
   window.gtag('js', new Date());
-  
-  const utms = getUTMParameters();
+
+  // Enable debug_mode in dev or when URL has ?debug_mode=true for real-time testing in GA4 DebugView
+  const isDebugMode =
+    window.location.search.includes('debug_mode=true') ||
+    import.meta.env.DEV;
+
+  // Standard config command: GA4 handles initial page view and reads campaign attribution automatically
   window.gtag('config', measurementId, {
-    send_page_view: false, // controlled manually
     anonymize_ip: true,
-    ...utms
+    ...(isDebugMode ? { debug_mode: true } : {}),
   });
 
   isInitialized = true;
-  trackPageView();
 }
 
-export function trackPageView(pagePath?: string): void {
-  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
-  if (!isInitialized || !window.gtag || !measurementId) return;
+/**
+ * Track when a user clicks a button or link to view a product demo.
+ *
+ * @param product 'CNMS' | 'Operations Advisor'
+ */
+export function trackProductDemoClick(product: 'CNMS' | 'Operations Advisor'): void {
+  if (typeof window === 'undefined' || !window.gtag || !isInitialized) return;
 
-  const utms = getUTMParameters();
-  window.gtag('event', 'page_view', {
-    page_title: document.title,
-    page_location: window.location.href,
-    page_path: pagePath || window.location.pathname,
-    ...utms
+  window.gtag('event', 'product_demo_click', {
+    product,
   });
 }
 
-export function trackProductSectionView(productName: 'cnms_v2' | 'operations_advisor'): void {
-  if (!isInitialized || !window.gtag) return;
-  window.gtag('event', 'product_section_view', {
-    product_name: productName,
-    ...getUTMParameters()
+/**
+ * Track when a product demo video actually begins playing for the first time during the page session.
+ *
+ * Requirements:
+ * - Listens to native video playback events (e.g. onPlay).
+ * - Does not fire on button click without playback starting.
+ * - Does not fire repeated events on pause, resume, or scrubbing.
+ * - Associated strictly with the product being played.
+ *
+ * @param product 'CNMS' | 'Operations Advisor'
+ */
+export function trackDemoVideoStart(product: 'CNMS' | 'Operations Advisor'): void {
+  if (typeof window === 'undefined' || !window.gtag || !isInitialized) return;
+
+  // Fire once per product during the page session
+  if (videoStartTracked.has(product)) {
+    return;
+  }
+
+  videoStartTracked.add(product);
+
+  window.gtag('event', 'demo_video_start', {
+    product,
   });
 }
 
-export function trackProductCTAClick(
-  productName: 'cnms_v2' | 'operations_advisor',
-  ctaLocation: 'hero' | 'product_section' | 'contact_section'
-): void {
-  if (!isInitialized || !window.gtag) return;
-  window.gtag('event', 'product_cta_click', {
-    product_name: productName,
-    cta_location: ctaLocation,
-    ...getUTMParameters()
-  });
-}
+/**
+ * Track GA4 recommended generate_lead event only after Formspree confirms a successful submission.
+ *
+ * Requirements:
+ * - Fired once per successful submission (inside response.ok).
+ * - Not fired on button clicks, validation attempts, or network failures.
+ * - Zero PII: sends only the non-identifying product interest.
+ *
+ * @param product 'CNMS' | 'Operations Advisor' | 'Both'
+ */
+export function trackGenerateLead(product: 'CNMS' | 'Operations Advisor' | 'Both'): void {
+  if (typeof window === 'undefined' || !window.gtag || !isInitialized) return;
 
-export function trackVideoStart(videoTitle: string, productName: 'cnms_v2' | 'operations_advisor'): void {
-  if (!isInitialized || !window.gtag) return;
-  window.gtag('event', 'video_start', {
-    video_title: videoTitle,
-    product_name: productName,
-    ...getUTMParameters()
-  });
-}
-
-export function trackVideoProgress(
-  videoTitle: string,
-  productName: 'cnms_v2' | 'operations_advisor',
-  progressPercent: 25 | 50 | 75
-): void {
-  if (!isInitialized || !window.gtag) return;
-  window.gtag('event', 'video_progress', {
-    video_title: videoTitle,
-    product_name: productName,
-    video_progress_percent: progressPercent,
-    ...getUTMParameters()
-  });
-}
-
-export function trackVideoComplete(videoTitle: string, productName: 'cnms_v2' | 'operations_advisor'): void {
-  if (!isInitialized || !window.gtag) return;
-  window.gtag('event', 'video_complete', {
-    video_title: videoTitle,
-    product_name: productName,
-    video_progress_percent: 100,
-    ...getUTMParameters()
-  });
-}
-
-export function trackDemoRequestClick(selectedProduct: 'cnms_v2' | 'operations_advisor' | 'both'): void {
-  if (!isInitialized || !window.gtag) return;
-  // Note: Only the product category is sent. Never send PII (name, email, company, notes).
-  window.gtag('event', 'demo_request_click', {
-    product_name: selectedProduct,
-    cta_location: 'contact_section',
-    ...getUTMParameters()
-  });
-}
-
-export function trackContactEmailClick(): void {
-  if (!isInitialized || !window.gtag) return;
-  window.gtag('event', 'contact_email_click', {
-    ...getUTMParameters()
+  window.gtag('event', 'generate_lead', {
+    product,
   });
 }
