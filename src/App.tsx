@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useSmoothScroll } from './hooks/useSmoothScroll';
+import { useCinematicScroll } from './hooks/useScrollAnimations';
 import { initGA } from './lib/analytics';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { CNMSSection } from './sections/CNMSSection';
 import { OperationsAdvisorSection } from './sections/OperationsAdvisorSection';
-import { Benefits } from './components/Benefits';
 import { DemoForm } from './components/DemoForm';
 import { Footer } from './components/Footer';
 
 export const App: React.FC = () => {
   const { scrollTo } = useSmoothScroll();
+  useCinematicScroll();
   const [selectedDemoProduct, setSelectedDemoProduct] = useState<'cnms_v2' | 'operations_advisor' | 'both'>('both');
 
   useEffect(() => {
@@ -28,29 +29,26 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-obsidian text-snow flex flex-col font-sans selection:bg-cyan-electric/20 selection:text-cyan-electric">
-      {/* Top Fixed Navigation */}
+    <div className="min-h-screen bg-[#050608] text-[#F1F3F5] flex flex-col font-sans selection:bg-neutral-800 selection:text-white">
+      {/* Top Fixed Minimal Navigation */}
       <Navbar onNavigate={handleNavigate} onRequestDemo={handleRequestDemo} />
 
-      {/* Main Content Sections */}
+      {/* Main Content Journey */}
       <main className="flex-1">
-        {/* Section A: Video-First Hero Experience */}
+        {/* Section 1: Opening / Hero with immediate video jump paths */}
         <Hero onNavigate={handleNavigate} onRequestDemo={handleRequestDemo} />
 
-        {/* Section D: CNMS v2.0 Satellite & Telemetry Experience */}
+        {/* Section 2: CNMS v2.0 Platform, Video Demo & Authentic Consoles */}
         <CNMSSection onRequestDemo={handleRequestDemo} />
 
-        {/* Section E: Operations Advisor 3D Cognitive Experience */}
+        {/* Section 3: Operations Advisor AI Co-Pilot & Video Demo */}
         <OperationsAdvisorSection onRequestDemo={handleRequestDemo} />
 
-        {/* Section F: Portfolio Benefits */}
-        <Benefits />
-
-        {/* Section G: Creative 3D Contact Section */}
+        {/* Section 4: Contact & Technical Consultation */}
         <DemoForm initialProduct={selectedDemoProduct} />
       </main>
 
-      {/* Section H: Giant Editorial Footer */}
+      {/* Minimal Swiss Editorial Footer */}
       <Footer onNavigate={handleNavigate} />
     </div>
   );

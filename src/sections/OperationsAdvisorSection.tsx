@@ -1,15 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  Sparkles,
-  BrainCircuit,
-  FileText,
-  Zap,
-  ArrowRight,
-  ShieldCheck,
-  Bot,
-} from 'lucide-react';
-import { NeuralSphere3D } from '../components/3d/NeuralSphere3D';
+import React, { useEffect, useRef } from 'react';
+import { VideoPlayer } from '../components/VideoPlayer';
 import { trackProductSectionView, trackProductCTAClick } from '../lib/analytics';
+import { ArrowUpRight } from 'lucide-react';
 
 interface OperationsAdvisorSectionProps {
   onRequestDemo: (product: 'operations_advisor') => void;
@@ -17,7 +9,6 @@ interface OperationsAdvisorSectionProps {
 
 export const OperationsAdvisorSection: React.FC<OperationsAdvisorSectionProps> = ({ onRequestDemo }) => {
   const sectionRef = useRef<HTMLElement>(null);
-  const [selectedPillar, setSelectedPillar] = useState(0);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -37,169 +28,163 @@ export const OperationsAdvisorSection: React.FC<OperationsAdvisorSectionProps> =
     return () => observer.disconnect();
   }, []);
 
-  const pillars = [
+  const capabilities = [
     {
-      title: "Contextual Incident Investigation",
-      summary: "Correlates multi-tier telemetry alerts with historical incident records to accelerate root-cause analysis during live operational shifts.",
-      icon: <BrainCircuit className="w-5 h-5 text-indigo-vibrant" />,
-      detail: "Assists duty engineers by synthesizing disparate telemetry logs into clear, actionable incident summaries without displacing human oversight."
+      num: '01',
+      title: 'Contextual Incident Investigation',
+      description: 'Correlates concurrent telemetry alerts with historical incident records to synthesize coherent diagnostic summaries during time-critical shift operations.',
     },
     {
-      title: "Standard Procedure Retrieval",
-      summary: "Instantly surfaces approved standard operating procedures (SOPs), manuals, and switchover checklists tailored to current equipment state.",
-      icon: <FileText className="w-5 h-5 text-indigo-vibrant" />,
-      detail: "Eliminates manual manual-hunting during time-critical waveguide, transponder, or antenna failovers."
+      num: '02',
+      title: 'SOP & Documentation Retrieval',
+      description: 'Surfaces approved switchover checklists, equipment manuals, and standard operating procedures tailored directly to the affected hardware state in seconds.',
     },
     {
-      title: "Early Warning Anomaly Detection",
-      summary: "Surfaces subtle pattern drifts across RF gain, humidity, and carrier tracking before alarms reach critical shutdown thresholds.",
-      icon: <Zap className="w-5 h-5 text-indigo-vibrant" />,
-      detail: "Provides operational teams with proactive warning windows to perform controlled maintenance."
+      num: '03',
+      title: 'Pattern Drift & Anomaly Correlation',
+      description: 'Identifies subtle pattern drifts across RF gain, ambient humidity, and carrier tracking before alarms escalate to critical shutdown thresholds.',
     },
     {
-      title: "Human-in-the-Loop Decision Augmentation",
-      summary: "Provides structured technical recommendations while ensuring all control actions require explicit authorized human approval.",
-      icon: <ShieldCheck className="w-5 h-5 text-indigo-vibrant" />,
-      detail: "Enterprise-grade governance preserving strict operational safety protocols across ground station infrastructure."
-    }
+      num: '04',
+      title: 'Human-in-the-Loop Operational Safety',
+      description: 'Engineered as a decision-support co-pilot: all operational actions, switchovers, and configurations require explicit authorized human approval.',
+    },
   ];
 
   return (
     <section
       id="operations-advisor"
       ref={sectionRef}
-      className="relative py-24 sm:py-28 px-4 sm:px-6 lg:px-8 bg-[#060914] border-b border-[#1E2D4A]/80 overflow-hidden"
+      className="relative pt-10 sm:pt-14 pb-14 sm:pb-16 px-4 sm:px-6 lg:px-8 bg-[#050608] hairline-b"
     >
-      {/* Background ambient lighting */}
-      <div className="absolute top-1/3 -left-48 w-[600px] h-[600px] bg-indigo-vibrant/10 blur-[170px] pointer-events-none -z-10" />
-
-      <div className="max-w-7xl mx-auto">
-        {/* Section Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-vibrant/15 border border-indigo-vibrant/30 text-indigo-300 text-tech-label uppercase mb-5">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-vibrant" />
-              <span>02 // COGNITIVE OPERATIONAL ASSISTANCE</span>
-            </div>
-
-            <h2 className="text-section-title text-white tracking-tight mb-3">
-              Operations Advisor
-            </h2>
-
-            <p className="font-sans font-medium text-lg sm:text-xl text-indigo-300 mb-4">
-              &ldquo;Operational Intelligence, Made Accessible.&rdquo;
-            </p>
-
-            <p className="text-body-lead text-mutedgrey max-w-2xl font-normal">
-              AI-assisted operational insights to help teams explore information and support better decisions. Synthesizes telemetry patterns and standard operating procedures to empower duty engineers.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => {
-                trackProductCTAClick('operations_advisor', 'product_section');
-                onRequestDemo('operations_advisor');
-              }}
-              className="px-6 py-3.5 rounded-full font-sans text-xs sm:text-sm font-semibold tracking-wide bg-indigo-vibrant text-white hover:bg-white hover:text-obsidian transition-all shadow-[0_0_20px_rgba(113,103,255,0.3)] flex items-center gap-2"
-            >
-              <span>REQUEST AN OPERATIONS ADVISOR DEMO</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Major Composition: Split-Screen with 3D Neural Sphere */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-20">
-          {/* Left Column: 3D Dimensional Neural Sphere */}
-          <div className="lg:col-span-6 flex flex-col items-center justify-center relative">
-            <div className="w-full aspect-square max-w-lg rounded-3xl bg-[#090D1F] border border-[#1E2D4A] p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between cinematic-glow-indigo">
-              <div className="flex items-center justify-between text-tech-label text-indigo-300 z-10">
-                <span className="flex items-center gap-1.5">
-                  <Bot className="w-4 h-4 text-indigo-vibrant" />
-                  <span>3D NEURAL COGNITIVE MESH</span>
-                </span>
-                <span className="text-mutedgrey">INTERACTIVE TOPOLOGY</span>
-              </div>
-
-              {/* 3D Neural Sphere Canvas */}
-              <div className="flex-1 w-full my-auto">
-                <NeuralSphere3D />
-              </div>
-
-              <div className="flex items-center justify-between text-tech-label text-mutedgrey pt-2 border-t border-[#1E2D4A]/60 z-10">
-                <span>SYNAPSE NODES: 140 COGNITIVE VERTICES</span>
-                <span className="text-cyan-electric">POINTER-RESPONSIVE</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Editorial Intelligence Pillars */}
-          <div className="lg:col-span-6 space-y-4">
-            <span className="text-tech-label text-mutedgrey uppercase block mb-4">
-              Core Cognitive Intelligence Pillars
+      <div className="max-w-7xl mx-auto w-full">
+        {/* Memorable Transition Bridge from CNMS to Operations Advisor */}
+        <div className="mb-8 sm:mb-10 pb-6 sm:pb-8 hairline-b" data-cinematic-reveal>
+          <div className="flex items-center gap-3 mb-4">
+            <span className="w-8 h-[1px] bg-sky-400" />
+            <span className="text-xs font-mono uppercase tracking-widest text-neutral-400">
+              Operational Transition
             </span>
+            <span className="w-8 h-[1px] bg-purple-400" />
+          </div>
+          <p className="editorial-subhead text-neutral-300 max-w-3xl">
+            From network visibility to operational reasoning: Once your network telemetry is visible in CNMS, Operations Advisor empowers duty engineers to investigate anomalies and access technical procedures without manual delays.
+          </p>
+        </div>
 
-            {pillars.map((pillar, idx) => {
-              const isSelected = selectedPillar === idx;
-              return (
-                <div
-                  key={idx}
-                  onClick={() => setSelectedPillar(idx)}
-                  className={`cursor-pointer p-5 sm:p-6 rounded-2xl border transition-all duration-300 ${
-                    isSelected
-                      ? 'bg-[#0E132B] border-indigo-vibrant shadow-[0_0_30px_rgba(113,103,255,0.15)] translate-x-1.5'
-                      : 'bg-[#080D1D]/70 border-[#1E2D4A]/70 hover:border-indigo-vibrant/40 text-mutedgrey'
-                  }`}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="p-2.5 rounded-xl bg-obsidian border border-[#1E2D4A] shrink-0">
-                      {pillar.icon}
-                    </div>
-                    <div>
-                      <h4 className={`text-base font-display font-semibold mb-1.5 ${isSelected ? 'text-white' : 'text-slate-300'}`}>
-                        {pillar.title}
-                      </h4>
-                      <p className="font-sans text-xs sm:text-sm text-mutedgrey leading-relaxed mb-2 font-normal">
-                        {pillar.summary}
-                      </p>
-                      {isSelected && (
-                        <p className="font-sans text-xs sm:text-sm text-indigo-200 pt-2 border-t border-[#1E2D4A]/60 leading-relaxed font-normal">
-                          {pillar.detail}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+        {/* Section Header */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8 sm:mb-10" data-cinematic-reveal>
+          <div className="lg:col-span-3">
+            <span className="editorial-label text-purple-400 block mb-2">
+              02 &bull; OPERATIONS ADVISOR
+            </span>
+            <span className="text-xs font-sans text-neutral-400 uppercase tracking-wider block">
+              AI Operations Co-Pilot
+            </span>
+          </div>
+
+          <div className="lg:col-span-9">
+            <h2 className="editorial-section-title text-white mb-6">
+              From operational questions to actionable insights.
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 hairline-t">
+              <p className="editorial-body-lead text-neutral-300">
+                Operations Advisor is an AI-assisted operations co-pilot designed for teleport engineers and broadcast NOC teams. It connects live incident context with approved documentation to accelerate decision-making.
+              </p>
+              <div className="flex flex-col justify-between">
+                <p className="editorial-body">
+                  Rather than replacing human oversight, Operations Advisor augments operator expertise during live shifts—eliminating manual documentation searches during time-critical carrier switchovers.
+                </p>
+                <div className="pt-4 mt-4 hairline-t">
+                  <button
+                    onClick={() => {
+                      trackProductCTAClick('operations_advisor', 'product_section');
+                      onRequestDemo('operations_advisor');
+                    }}
+                    className="text-xs font-sans uppercase tracking-wider text-purple-400 hover:text-white transition-colors inline-flex items-center gap-1.5"
+                  >
+                    <span>Request Operations Advisor Briefing</span>
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-              );
-            })}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* In-Depth Cognitive Capabilities Closing Action */}
-        <div className="pt-10 border-t border-[#1E2D4A]/80 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div>
-            <h4 className="text-xl sm:text-2xl font-display font-bold text-white mb-1">
-              Ready to Accelerate Operational Investigation?
-            </h4>
-            <p className="text-xs sm:text-sm text-mutedgrey font-sans font-normal">
-              Schedule an interactive briefing with our cognitive AI engineering team at the Expo.
-            </p>
+        {/* PRIMARY FOCUS: Prominent Cinema Video Demonstration */}
+        <div className="mb-8 sm:mb-10" data-video-entrance>
+          <div className="hairline-all bg-[#090A14]">
+            {/* Video Header Strip */}
+            <div className="flex items-center justify-between px-5 py-3.5 hairline-b bg-[#0C0D1A] text-xs font-sans">
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-purple-400" />
+                <span className="text-white font-medium font-display">
+                  Operations Advisor &bull; Official Video Demonstration
+                </span>
+              </div>
+              <span className="text-neutral-400 text-xs hidden sm:inline">
+                Co-Pilot Interface Walkthrough
+              </span>
+            </div>
+
+            {/* Expansive Playable Video Frame */}
+            <VideoPlayer
+              src="/videos/operations-advisor.mp4"
+              title="Operations Advisor Co-Pilot Walkthrough"
+              productName="operations_advisor"
+              accentColor="purple"
+              callToActionLabel="Watch Operations Advisor Demo"
+              className="w-full"
+            />
+
+            {/* Video Meta Strip */}
+            <div className="px-5 py-3 hairline-t bg-[#080812] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-sans text-neutral-400">
+              <div className="flex items-center gap-3">
+                <span className="text-purple-400 font-semibold">Role:</span>
+                <span>Incident Triage &bull; SOP Search &bull; Decision Augmentation &bull; Shift Memory</span>
+              </div>
+              <span className="text-neutral-500 text-[11px] font-mono">
+                Authentic Operations Advisor Demonstration
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Demonstrated Capabilities Breakdown (Derived from real video functionality, zero CNMS confusion) */}
+        <div data-cinematic-reveal className="space-y-6">
+          <div className="pb-3 hairline-b">
+            <span className="editorial-label text-purple-400 block mb-1">
+              Demonstrated System Capabilities
+            </span>
+            <h3 className="editorial-subhead text-white">
+              Built for high-stakes operational environments
+            </h3>
           </div>
 
-          <button
-            onClick={() => {
-              trackProductCTAClick('operations_advisor', 'product_section');
-              onRequestDemo('operations_advisor');
-            }}
-            className="px-8 py-3.5 rounded-full font-sans text-xs sm:text-sm font-semibold tracking-wide bg-indigo-vibrant text-white hover:bg-white hover:text-obsidian transition-all shadow-[0_0_20px_rgba(113,103,255,0.3)] flex items-center gap-2 shrink-0"
-          >
-            <span>REQUEST AN OPERATIONS ADVISOR DEMO</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {capabilities.map((cap) => (
+              <div key={cap.num} className="p-6 bg-[#080812] hairline-all flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-3 text-xs font-mono text-purple-400">
+                    <span>CAPABILITY {cap.num}</span>
+                    <span className="text-neutral-500 font-sans">Enterprise Governance</span>
+                  </div>
+                  <h4 className="text-base font-display font-medium text-white mb-2">
+                    {cap.title}
+                  </h4>
+                  <p className="editorial-body text-neutral-300 text-sm">
+                    {cap.description}
+                  </p>
+                </div>
+                <div className="pt-4 mt-4 hairline-t text-[11px] font-mono text-neutral-500">
+                  Duty Engineer Support &bull; Operations Advisor
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
   );
 };
-

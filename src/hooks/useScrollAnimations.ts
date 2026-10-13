@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import anime from 'animejs';
 
+/**
+ * Calculates page scroll progress percentage (0 - 100)
+ */
 export function useScrollProgress() {
   const [progress, setProgress] = useState(0);
 
@@ -20,40 +23,98 @@ export function useScrollProgress() {
   return progress;
 }
 
-export function useIntersectionReveal(selector: string, options = { threshold: 0.15 }) {
+/**
+ * Signature Cinematic Scroll Reveals using Anime.js and IntersectionObserver.
+ * Handles text-mask reveals, video scale entrances, and delicate editorial fades.
+ */
+export function useCinematicScroll() {
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const elements = document.querySelectorAll(selector);
-
-    if (elements.length === 0) return;
 
     if (prefersReducedMotion) {
-      elements.forEach((el) => {
-        (el as HTMLElement).style.opacity = '1';
+      document.querySelectorAll('.text-mask-child').forEach((el) => {
         (el as HTMLElement).style.transform = 'none';
+        (el as HTMLElement).style.opacity = '1';
+      });
+      document.querySelectorAll('[data-cinematic-reveal]').forEach((el) => {
+        (el as HTMLElement).style.transform = 'none';
+        (el as HTMLElement).style.opacity = '1';
       });
       return;
     }
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          anime({
-            targets: entry.target,
-            opacity: [0, 1],
-            translateY: [24, 0],
-            duration: 800,
-            easing: 'easeOutCubic',
-          });
-          observer.unobserve(entry.target);
-        }
-      });
-    }, options);
+    // 1. Text-Mask Line Reveal
+    const maskObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const target = entry.target as HTMLElement;
+            const children = target.querySelectorAll('.text-mask-child');
+            if (children.length > 0) {
+              anime({
+                targets: children,
+                translateY: ['115%', '0%'],
+                opacity: [0, 1],
+                duration: 850,
+                delay: anime.stagger(140),
+                easing: 'cubicBezier(0.16, 1, 0.3, 1)',
+              });
+            }
+            maskObserver.unobserve(target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+    );
 
-    elements.forEach((el) => observer.observe(el));
+    document.querySelectorAll('[data-mask-reveal]').forEach((el) => maskObserver.observe(el));
+
+    // 2. Video Frame Cinematic Scale Entrance
+    const videoObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            anime({
+              targets: entry.target,
+              scale: [0.96, 1],
+              opacity: [0.35, 1],
+              duration: 900,
+              easing: 'cubicBezier(0.16, 1, 0.3, 1)',
+            });
+            videoObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -60px 0px' }
+    );
+
+    document.querySelectorAll('[data-video-entrance]').forEach((el) => videoObserver.observe(el));
+
+    // 3. Editorial Content Fade-Up
+    const contentObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            anime({
+              targets: entry.target,
+              translateY: [18, 0],
+              opacity: [0, 1],
+              duration: 750,
+              easing: 'cubicBezier(0.16, 1, 0.3, 1)',
+            });
+            contentObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    document.querySelectorAll('[data-cinematic-reveal]').forEach((el) => contentObserver.observe(el));
 
     return () => {
-      observer.disconnect();
+      maskObserver.disconnect();
+      videoObserver.disconnect();
+      contentObserver.disconnect();
     };
-  }, [selector, options]);
+  }, []);
 }

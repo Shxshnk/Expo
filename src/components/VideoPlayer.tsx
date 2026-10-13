@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Play, AlertCircle, RefreshCw } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, RefreshCw } from 'lucide-react';
 import {
   trackVideoStart,
   trackVideoProgress,
@@ -11,6 +11,8 @@ interface VideoPlayerProps {
   title: string;
   productName: 'cnms_v2' | 'operations_advisor';
   poster?: string;
+  accentColor?: 'cyan' | 'purple';
+  callToActionLabel?: string;
   className?: string;
 }
 
@@ -19,34 +21,71 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   title,
   productName,
   poster,
+  accentColor = 'cyan',
+  callToActionLabel,
   className = '',
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hasError, setHasError] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [controlsVisible, setControlsVisible] = useState(false);
   const [milestonesReached, setMilestonesReached] = useState<Set<number>>(new Set());
 
-  // Reset milestone tracking when source changes
+  const isCyan = accentColor === 'cyan';
+  const accentHex = isCyan ? '#38bdf8' : '#a855f7';
+
   useEffect(() => {
     setMilestonesReached(new Set());
     setHasError(false);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
   }, [src]);
 
-  const handlePlay = () => {
-    setIsPlaying(true);
-    if (!milestonesReached.has(0)) {
-      trackVideoStart(title, productName);
-      setMilestonesReached((prev) => new Set(prev).add(0));
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (video.paused || video.ended) {
+      video.play().catch(() => setHasError(true));
+      setIsPlaying(true);
+      if (!milestonesReached.has(0)) {
+        trackVideoStart(title, productName);
+        setMilestonesReached((prev) => new Set(prev).add(0));
+      }
+    } else {
+      video.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  const toggleMute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = !video.muted;
+    setIsMuted(video.muted);
+  };
+
+  const toggleFullscreen = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (!document.fullscreenElement) {
+      video.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
     }
   };
 
   const handleTimeUpdate = () => {
     const video = videoRef.current;
-    if (!video || !video.duration || video.duration === 0) return;
+    if (!video || !video.duration) return;
 
+    setCurrentTime(video.currentTime);
     const percent = (video.currentTime / video.duration) * 100;
 
-    // Milestone tracking (25, 50, 75)
     if (percent >= 25 && !milestonesReached.has(25)) {
       trackVideoProgress(title, productName, 25);
       setMilestonesReached((prev) => new Set(prev).add(25));
@@ -59,6 +98,21 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   };
 
+  const handleLoadedMetadata = () => {
+    const video = videoRef.current;
+    if (video) {
+      setDuration(video.duration);
+    }
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const video = videoRef.current;
+    if (!video) return;
+    const target = parseFloat(e.target.value);
+    video.currentTime = target;
+    setCurrentTime(target);
+  };
+
   const handleEnded = () => {
     setIsPlaying(false);
     if (!milestonesReached.has(100)) {
@@ -67,66 +121,134 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   };
 
-  const handleError = () => {
-    setHasError(true);
+  const formatTime = (secs: number) => {
+    if (isNaN(secs)) return '0:00';
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
-  const handleRetry = () => {
-    setHasError(false);
-    if (videoRef.current) {
-      videoRef.current.load();
-    }
-  };
+  const playLabel = callToActionLabel || (productName === 'cnms_v2' ? 'Watch CNMS v2.0 Demo' : 'Watch Operations Advisor Demo');
 
   return (
-    <div className={`relative rounded-2xl overflow-hidden bg-card-bg border border-card-border shadow-2xl group ${className}`}>
-      {/* Subtle top border highlight */}
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-accent-primary/40 to-transparent z-10 pointer-events-none" />
-
+    <div
+      className={`relative w-full aspect-video bg-[#020305] hairline-all select-none overflow-hidden group ${className}`}
+      onMouseEnter={() => setControlsVisible(true)}
+      onMouseLeave={() => setControlsVisible(false)}
+    >
       {hasError ? (
-        <div className="aspect-video w-full flex flex-col items-center justify-center p-8 text-center bg-card-bg/95">
-          <AlertCircle className="w-12 h-12 text-accent-danger mb-4 opacity-80" />
-          <h4 className="text-base font-semibold text-white mb-2">Video Demonstration Unavailable</h4>
-          <p className="text-xs sm:text-sm text-text-muted max-w-md mb-6 leading-relaxed">
-            The media stream could not be loaded. Please ensure the demonstration file is available at the expected path.
-          </p>
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-[#07090E]">
+          <p className="text-sm font-medium text-white mb-2">Video Demonstration Unavailable</p>
+          <p className="text-xs text-neutral-400 mb-4 font-mono">{src}</p>
           <button
-            onClick={handleRetry}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-card-bg border border-card-border text-xs font-medium text-white hover:border-accent-primary transition-colors"
+            onClick={() => {
+              setHasError(false);
+              videoRef.current?.load();
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[#222834] text-xs text-neutral-300 hover:text-white"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>Retry Loading</span>
+            <span>Reload Stream</span>
           </button>
         </div>
       ) : (
-        <div className="relative aspect-video w-full bg-black/90">
+        <>
           <video
             ref={videoRef}
             src={src}
             poster={poster}
             title={title}
             aria-label={title}
-            controls
-            preload="metadata"
             playsInline
-            onPlay={handlePlay}
-            onPause={() => setIsPlaying(false)}
+            preload="metadata"
             onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={handleLoadedMetadata}
             onEnded={handleEnded}
-            onError={handleError}
-            className="w-full h-full object-contain"
-          >
-            Your browser does not support HTML5 video playback.
-          </video>
+            onError={() => setHasError(true)}
+            onClick={togglePlay}
+            className="w-full h-full object-contain cursor-pointer"
+          />
 
-          {/* Quick status bar overlay on pause */}
+          {/* Obvious, Prominent Center Play Control & Label (Visible when paused) */}
           {!isPlaying && (
-            <div className="absolute bottom-16 left-4 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex items-center gap-2 px-2.5 py-1 rounded bg-black/70 backdrop-blur text-[11px] font-mono text-cyan-300 border border-cyan-500/20">
-              <Play className="w-3 h-3 fill-current" />
-              <span>{title}</span>
+            <div
+              onClick={togglePlay}
+              className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 hover:bg-black/25 transition-colors cursor-pointer z-20 group/trigger"
+            >
+              <div className="flex items-center gap-3 px-5 py-3 rounded-full bg-black/80 border border-white/30 text-white backdrop-blur-md shadow-2xl group-hover/trigger:scale-105 group-hover/trigger:border-white transition-all">
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: accentHex }}
+                >
+                  <Play className="w-4 h-4 ml-0.5 text-black fill-current" />
+                </div>
+                <span className="font-display font-medium text-sm sm:text-base text-white tracking-tight pr-2">
+                  {playLabel}
+                </span>
+              </div>
             </div>
           )}
-        </div>
+
+          {/* Clean Editorial Control Bar */}
+          <div
+            className={`absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-t from-black/95 via-black/70 to-transparent transition-opacity duration-200 z-30 ${
+              isPlaying && !controlsVisible ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            }`}
+          >
+            {/* Scrubber */}
+            <div className="flex items-center mb-2">
+              <input
+                type="range"
+                min={0}
+                max={duration || 100}
+                step={0.1}
+                value={currentTime}
+                onChange={handleSeek}
+                aria-label="Seek video position"
+                className="w-full h-1 bg-white/20 appearance-none cursor-pointer hover:h-1.5 transition-all"
+                style={{ accentColor: accentHex }}
+              />
+            </div>
+
+            {/* Transport details */}
+            <div className="flex items-center justify-between text-xs text-neutral-300">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={togglePlay}
+                  className="hover:text-white transition-colors"
+                  aria-label={isPlaying ? 'Pause' : 'Play'}
+                >
+                  {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
+                </button>
+
+                <button
+                  onClick={toggleMute}
+                  className="hover:text-white transition-colors"
+                  aria-label={isMuted ? 'Unmute' : 'Mute'}
+                >
+                  {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                </button>
+
+                <span className="text-[11px] text-neutral-400 font-mono">
+                  {formatTime(currentTime)} / {formatTime(duration)}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-[11px] hidden sm:inline-block font-sans text-neutral-400">
+                  {title}
+                </span>
+                <button
+                  onClick={toggleFullscreen}
+                  className="hover:text-white transition-colors"
+                  aria-label="Fullscreen"
+                >
+                  <Maximize className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

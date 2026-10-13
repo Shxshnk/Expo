@@ -9,34 +9,37 @@
   
   html {
     scroll-behavior: smooth;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: #05070B;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #050608;
+    color: #F1F3F5;
   }
   
   body {
-    background-color: #05070B;
-    color: #F5F7FA;
+    background-color: #050608;
+    color: #F1F3F5;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Custom scrollbar */
+  /* Refined, unobtrusive scrollbar */
   ::-webkit-scrollbar {
     width: 5px;
     height: 5px;
   }
   ::-webkit-scrollbar-track {
-    background: #05070B;
+    background: #050608;
   }
   ::-webkit-scrollbar-thumb {
-    background: #1E2D4A;
-    border-radius: 9999px;
+    background: #1E232E;
+    border-radius: 2px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #45D8FF;
+    background: #2D3546;
   }
 }
 
-/* Lenis Recommended CSS */
+/* Lenis Smooth Scroll Recommended CSS */
 html.lenis, html.lenis body {
   height: auto;
 }
@@ -53,108 +56,106 @@ html.lenis, html.lenis body {
   pointer-events: none;
 }
 
-/* Editorial & 3D Utility Classes */
+/* Editorial Manrope & Inter Typography Hierarchy */
 @layer utilities {
-  .text-hero {
+  .font-display {
+    font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  }
+
+  .font-body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  .editorial-hero-title {
     font-family: 'Manrope', system-ui, sans-serif;
-    font-size: clamp(2.8rem, 6vw, 5.5rem);
-    font-weight: 700;
+    font-size: clamp(2.25rem, 4.4vw, 4.25rem);
+    font-weight: 600;
     line-height: 1.08;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.035em;
   }
-  .text-section-title {
+
+  .editorial-section-title {
     font-family: 'Manrope', system-ui, sans-serif;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
+    font-size: clamp(2.25rem, 4.4vw, 3.85rem);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.032em;
   }
-  .text-product-title {
+
+  .editorial-subhead {
     font-family: 'Manrope', system-ui, sans-serif;
-    font-size: clamp(1.75rem, 3vw, 2.5rem);
-    font-weight: 700;
-    line-height: 1.2;
+    font-size: clamp(1.2rem, 1.8vw, 1.6rem);
+    font-weight: 500;
+    line-height: 1.35;
     letter-spacing: -0.015em;
   }
-  .text-body-lead {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-size: clamp(1rem, 1.2vw, 1.125rem);
+
+  .editorial-body-lead {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: clamp(1.0625rem, 1.25vw, 1.2rem);
     font-weight: 400;
     line-height: 1.65;
+    color: #D1D5DB;
   }
-  .text-tech-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: clamp(0.7rem, 0.85vw, 0.75rem);
-    font-weight: 500;
-    letter-spacing: 0.04em;
+
+  .editorial-body {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 400;
+    line-height: 1.68;
+    color: #9CA3AF;
   }
-  .text-nav-link {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-size: 0.875rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
+
+  .editorial-label {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Text Mask Reveal wrappers */
+  .text-mask-wrapper {
+    overflow: hidden;
+    display: block;
+  }
+
+  .text-mask-child {
+    display: block;
+    transform: translateY(115%);
+    opacity: 0;
+  }
+
+  /* Sharp hairline dividing lines */
+  .hairline-b {
+    border-bottom: 1px solid #141720;
+  }
+  .hairline-t {
+    border-top: 1px solid #141720;
+  }
+  .hairline-l {
+    border-left: 1px solid #141720;
+  }
+  .hairline-r {
+    border-right: 1px solid #141720;
+  }
+  .hairline-all {
+    border: 1px solid #141720;
   }
 }
 
-.text-outline {
-  -webkit-text-stroke: 1px rgba(245, 247, 250, 0.35);
-  color: transparent;
-}
-.text-outline-cyan {
-  -webkit-text-stroke: 1px rgba(69, 216, 255, 0.5);
-  color: transparent;
-}
-
-.perspective-1000 {
-  perspective: 1000px;
-}
-
-.cinematic-glow {
-  box-shadow: 0 0 60px -15px rgba(69, 216, 255, 0.25);
-}
-
-.cinematic-glow-indigo {
-  box-shadow: 0 0 60px -15px rgba(113, 103, 255, 0.25);
-}
-
-.grid-overlay {
-  background-size: 48px 48px;
-  background-image: 
-    linear-gradient(to right, rgba(69, 216, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(69, 216, 255, 0.035) 1px, transparent 1px);
-}
-
-/* Corner bracket reticles for technical framing */
-.reticle-bracket {
-  position: relative;
-}
-.reticle-bracket::before {
-  content: '';
-  position: absolute;
-  top: -1px;
-  left: -1px;
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid #45D8FF;
-  border-left: 2px solid #45D8FF;
-}
-.reticle-bracket::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  right: -1px;
-  width: 10px;
-  height: 10px;
-  border-bottom: 2px solid #45D8FF;
-  border-right: 2px solid #45D8FF;
-}
-
-/* Restrained animations */
+/* Reduced Motion Override */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .text-mask-child {
+    transform: none !important;
+    opacity: 1 !important;
   }
 }
