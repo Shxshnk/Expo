@@ -19,6 +19,10 @@ declare global {
   }
 }
 
+const GA_MEASUREMENT_ID =
+  (import.meta.env.VITE_GA_MEASUREMENT_ID as string | undefined) ||
+  'G-M60W5YXE1Y';
+
 let isInitialized = false;
 
 // Session-level set preventing repeated demo_video_start events per product during a page session
@@ -33,7 +37,7 @@ const videoStartTracked = new Set<string>();
 export function initGA(): void {
   if (typeof window === 'undefined' || isInitialized) return;
 
-  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+  const measurementId = GA_MEASUREMENT_ID;
   if (!measurementId || measurementId.trim() === '') {
     // GA4 gracefully disabled when measurement ID is not provided
     return;
